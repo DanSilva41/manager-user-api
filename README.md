@@ -11,8 +11,6 @@ Application built using Java 17 and Spring Boot. It provides a RESTful API for m
     - [Installation](#installation)
     - [Running the Application](#running-the-application)
     - [Running Tests](#running-tests)
-- [API Endpoints](#api-endpoints)
-- [Database Migrations](#database-migrations)
 - [License](#license)
 
 ## Features
