@@ -1,3 +1,25 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: manager-user-api
+  datasource:
+    username: ${DB_USERNAME:app-manager-user}
+    password: ${DB_PASSWORD:G&k1>qHB>s<qkJ:D10dkI374}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/db-manager-user}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health, metrics'
+  endpoint:
+    health:
+      show-details: always
+  health:
+    diskSpace:
+      enabled: false
