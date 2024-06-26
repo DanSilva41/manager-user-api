@@ -23,12 +23,12 @@ public class ManageUserService {
     public DetailUserDTO create(final CreateUserDTO newUser) {
         final var savedUser = userRepository.save(
                 User.builder()
-                        .username(newUser.getUsername())
-                        .password(newUser.getPassword())
+                        .username(newUser.username())
+                        .password(newUser.password())
                         .person(Person.builder()
-                                .firstName(newUser.getPerson().getFirstName())
-                                .lastName(newUser.getPerson().getLastName())
-                                .email(newUser.getPerson().getEmail())
+                                .firstName(newUser.person().firstName())
+                                .lastName(newUser.person().lastName())
+                                .email(newUser.person().email())
                                 .build())
                         .active(true)
                         .build()
