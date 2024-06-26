@@ -1,7 +1,7 @@
-package com.challenge.manageruser.model.backing;
+package com.challenge.manageruser.model.entity.backing;
 
-import com.challenge.manageruser.model.BaseEntity;
-import com.challenge.manageruser.support.builder.model.PersonBuilder;
+import com.challenge.manageruser.model.entity.BaseEntity;
+import com.challenge.manageruser.support.builder.entity.PersonBuilder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -45,8 +45,7 @@ public class Person extends BaseEntity {
         // default constructor
     }
 
-    public Person(final Integer code, final String firstName, final String lastName, final String email) {
-        this.code = code;
+    public Person(final String firstName, final String lastName, final String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;

@@ -1,8 +1,8 @@
-package com.challenge.manageruser.model.security;
+package com.challenge.manageruser.model.entity.security;
 
-import com.challenge.manageruser.model.BaseEntity;
-import com.challenge.manageruser.model.backing.Person;
-import com.challenge.manageruser.support.builder.model.UserBuilder;
+import com.challenge.manageruser.model.entity.BaseEntity;
+import com.challenge.manageruser.model.entity.backing.Person;
+import com.challenge.manageruser.support.builder.entity.UserBuilder;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,8 +52,7 @@ public class User extends BaseEntity {
         // default constructor
     }
 
-    public User(final Integer code, final String username, final String password, final boolean active, final Person person) {
-        this.code = code;
+    public User(final String username, final String password, final boolean active, final Person person) {
         this.username = username;
         this.password = password;
         this.active = active;

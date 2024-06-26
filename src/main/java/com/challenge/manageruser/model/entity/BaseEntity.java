@@ -1,4 +1,4 @@
-package com.challenge.manageruser.model;
+package com.challenge.manageruser.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
