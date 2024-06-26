@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public record DetailUserDTO(
         Integer code,
         String username,
-        boolean active,
+        Boolean active,
         DetailPersonDTO person,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

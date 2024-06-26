@@ -7,7 +7,7 @@ public class UserBuilder {
 
     private String username;
     private String password;
-    private boolean active;
+    private Boolean active;
     private Person person;
 
     public User build() {

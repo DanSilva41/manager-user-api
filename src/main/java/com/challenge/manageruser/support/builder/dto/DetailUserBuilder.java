@@ -9,7 +9,7 @@ public class DetailUserBuilder {
 
     private Integer code;
     private String username;
-    private boolean active;
+    private Boolean active;
 
     private DetailPersonDTO person;
     private LocalDateTime createdAt;
@@ -29,7 +29,7 @@ public class DetailUserBuilder {
         return this;
     }
 
-    public DetailUserBuilder active(final boolean active) {
+    public DetailUserBuilder active(final Boolean active) {
         this.active = active;
         return this;
     }

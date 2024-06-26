@@ -1,15 +1,10 @@
 package com.challenge.manageruser.service;
 
-import com.challenge.manageruser.model.dto.person.DetailPersonDTO;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
-import com.challenge.manageruser.model.entity.backing.Person;
-import com.challenge.manageruser.model.entity.security.User;
 import com.challenge.manageruser.repository.UserRepository;
+import com.challenge.manageruser.support.mapper.UserMapper;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Service
 public class ManageUserService {
@@ -22,32 +17,9 @@ public class ManageUserService {
 
     public DetailUserDTO create(final CreateUserDTO newUser) {
         final var savedUser = userRepository.save(
-                User.builder()
-                        .username(newUser.username())
-                        .password(newUser.password())
-                        .person(Person.builder()
-                                .firstName(newUser.person().firstName())
-                                .lastName(newUser.person().lastName())
-                                .email(newUser.person().email())
-                                .build())
-                        .active(true)
-                        .build()
+                UserMapper.toUser(newUser)
         );
 
-        return DetailUserDTO.builder()
-                .code(savedUser.getCode())
-                .username(savedUser.getUsername())
-                .active(savedUser.isActive())
-                .person(DetailPersonDTO.builder()
-                        .code(savedUser.getPerson().getCode())
-                        .firstName(savedUser.getPerson().getFirstName())
-                        .lastName(savedUser.getPerson().getLastName())
-                        .email(savedUser.getPerson().getEmail())
-                        .createdAt(LocalDateTime.ofInstant(savedUser.getPerson().getCreatedAt(), ZoneOffset.UTC))
-                        .updatedAt(LocalDateTime.ofInstant(savedUser.getPerson().getUpdatedAt(), ZoneOffset.UTC))
-                        .build())
-                .createdAt(LocalDateTime.ofInstant(savedUser.getCreatedAt(), ZoneOffset.UTC))
-                .updatedAt(LocalDateTime.ofInstant(savedUser.getUpdatedAt(), ZoneOffset.UTC))
-                .build();
+        return UserMapper.toDetailUser(savedUser);
     }
 }
