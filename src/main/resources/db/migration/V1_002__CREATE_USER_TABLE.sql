@@ -10,3 +10,7 @@ CREATE TABLE IF NOT EXISTS security."user" (
     CONSTRAINT un_user_username UNIQUE (username),
     CONSTRAINT fk_person_code_user FOREIGN KEY (person_code) REFERENCES backing.person(code)
 );
+
+CREATE SEQUENCE security.user_code_seq
+    INCREMENT BY 1
+    START WITH 1;
