@@ -20,8 +20,12 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 }
+
+val commonsLang3Version: String by project
+val commonsTextVersion: String by project
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -30,6 +34,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-database-postgresql")
+	implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
+	implementation("org.apache.commons:commons-text:${commonsTextVersion}")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	runtimeOnly("org.postgresql:postgresql")
