@@ -1,6 +1,7 @@
 package com.challenge.manageruser.model.backing;
 
 import com.challenge.manageruser.model.BaseEntity;
+import com.challenge.manageruser.support.builder.model.PersonBuilder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -104,5 +105,8 @@ public class Person extends BaseEntity {
         this.email = email;
     }
 
+    public static PersonBuilder builder() {
+        return new PersonBuilder();
+    }
 
 }
