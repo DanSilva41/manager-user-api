@@ -26,6 +26,7 @@ repositories {
 
 val commonsLang3Version: String by project
 val commonsTextVersion: String by project
+val dataFakerVersion: String by project
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -44,6 +45,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
+	implementation("net.datafaker:datafaker:${dataFakerVersion}")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
