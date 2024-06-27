@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,12 +24,10 @@ class GetUsersResourceIT extends AbstractIntegrationTest {
     private static final String USER_V1_ENDPOINT = "/v1/user";
 
     private final MockMvc mockMvc;
-    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    GetUsersResourceIT(final MockMvc mockMvc, final JdbcTemplate jdbcTemplate) {
+    GetUsersResourceIT(final MockMvc mockMvc) {
         this.mockMvc = mockMvc;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     @DisplayName("""

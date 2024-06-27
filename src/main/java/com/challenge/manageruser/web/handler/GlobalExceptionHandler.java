@@ -1,6 +1,8 @@
 package com.challenge.manageruser.web.handler;
 
 import com.challenge.manageruser.exception.BusinessException;
+import com.google.common.collect.Iterables;
+import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -53,6 +55,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             final var formattedField = LOWER_CAMEL.to(LOWER_UNDERSCORE, error.getField());
             return "%s: %s".formatted(formattedField, error.getDefaultMessage());
         }).toList();
+
+        final var problemDetail = ProblemDetail.forStatus(BAD_REQUEST);
+        problemDetail.setTitle("Invalid request content");
+        problemDetail.setProperty("messages", messages);
+        return buildResponseProblemDetail(problemDetail);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(final ConstraintViolationException exception) {
+        final var messages = exception.getConstraintViolations().stream().map(error -> {
+            final var lastField = Iterables.getLast(error.getPropertyPath());
+            final var formattedField = LOWER_CAMEL.to(LOWER_UNDERSCORE, lastField.getName());
+            return "%s: %s".formatted(formattedField, error.getMessage());
+        }).toList();
+
         final var problemDetail = ProblemDetail.forStatus(BAD_REQUEST);
         problemDetail.setTitle("Invalid request content");
         problemDetail.setProperty("messages", messages);

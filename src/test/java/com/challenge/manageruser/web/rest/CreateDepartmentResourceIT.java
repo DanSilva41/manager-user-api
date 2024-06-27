@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class DepartmentResourceIT extends AbstractIntegrationTest {
+class CreateDepartmentResourceIT extends AbstractIntegrationTest {
 
     private static final String DEPARTMENT_V1_ENDPOINT = "/v1/department";
 
@@ -31,7 +31,7 @@ class DepartmentResourceIT extends AbstractIntegrationTest {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    DepartmentResourceIT(final MockMvc mockMvc, final JdbcTemplate jdbcTemplate) {
+    CreateDepartmentResourceIT(final MockMvc mockMvc, final JdbcTemplate jdbcTemplate) {
         this.mockMvc = mockMvc;
         this.jdbcTemplate = jdbcTemplate;
     }
