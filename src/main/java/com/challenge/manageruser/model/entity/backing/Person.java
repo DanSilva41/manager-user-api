@@ -51,6 +51,10 @@ public class Person extends BaseEntity {
         this.email = email;
     }
 
+    public String getFullName() {
+        return "%s %s".formatted(firstName, lastName);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

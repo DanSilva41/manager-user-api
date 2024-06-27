@@ -11,6 +11,8 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
+  jackson:
+    property-naming-strategy: SNAKE_CASE
   mvc:
     problemdetails:
       enabled: true

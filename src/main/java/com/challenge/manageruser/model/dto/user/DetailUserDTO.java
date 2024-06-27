@@ -3,12 +3,9 @@ package com.challenge.manageruser.model.dto.user;
 import com.challenge.manageruser.model.dto.department.DetailDepartmentDTO;
 import com.challenge.manageruser.model.dto.person.DetailPersonDTO;
 import com.challenge.manageruser.support.builder.dto.DetailUserBuilder;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.time.LocalDateTime;
 
-@JsonNaming(SnakeCaseStrategy.class)
 public record DetailUserDTO(
         Integer code,
         String username,
