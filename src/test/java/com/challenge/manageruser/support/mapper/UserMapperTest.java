@@ -5,6 +5,7 @@ import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
 import com.challenge.manageruser.model.entity.backing.Person;
 import com.challenge.manageruser.model.entity.security.User;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -13,11 +14,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import static com.challenge.manageruser.factory.FakerFactory.faker;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class UserMapperTest {
 
+    @DisplayName("""
+            DADO a solicitação de um novo usuário
+            QUANDO mapear os campos para a entidade User
+            DEVE refletir os valores corretamente
+            """)
     @Test
     void shouldMapperToUserFromCreateUserDTO() {
         final CreatePersonDTO newPerson = new CreatePersonDTO(
@@ -25,7 +32,7 @@ class UserMapperTest {
         );
         final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), newPerson);
 
-        final User mappedUser = UserMapper.toUser(newUser);
+        final User mappedUser = assertDoesNotThrow(() -> UserMapper.toUser(newUser));
         assertNotNull(mappedUser);
         assertEquals(newUser.username(), mappedUser.getUsername());
         assertEquals(newUser.password(), mappedUser.getPassword());
@@ -35,6 +42,11 @@ class UserMapperTest {
         assertEquals(newUser.person().email(), mappedUser.getPerson().getEmail());
     }
 
+    @DisplayName("""
+            DADO um usuário com entidade (User)
+            QUANDO mapear os campos para a visualização detalhada
+            DEVE refletir os valores corretamente
+            """)
     @Test
     void shouldMapperToDetailUserFromUser() {
         final User user = User.builder()
@@ -52,7 +64,7 @@ class UserMapperTest {
         ReflectionTestUtils.setField(user.getPerson(), "createdAt", Instant.now());
         ReflectionTestUtils.setField(user.getPerson(), "updatedAt", Instant.now());
 
-        final DetailUserDTO mappedDetailUser = UserMapper.toDetailUser(user);
+        final DetailUserDTO mappedDetailUser = assertDoesNotThrow(() -> UserMapper.toDetailUser(user));
         assertNotNull(mappedDetailUser);
         assertEquals(user.getCode(), mappedDetailUser.code());
         assertEquals(user.getUsername(), mappedDetailUser.username());

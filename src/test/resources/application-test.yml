@@ -1,0 +1,6 @@
+test:
+  tables-ignored-on-truncate: >
+    flyway_schema_history
+  schemas-for-truncate: >
+    backing,
+    security
