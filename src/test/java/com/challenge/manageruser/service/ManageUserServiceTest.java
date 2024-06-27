@@ -134,10 +134,10 @@ class ManageUserServiceTest {
 
         final var expectedMessage = "ERROR: duplicate key violates unique constraint 'un_person_email'";
         when(userRepository.existsByPersonEmail(any())).thenReturn(false);
-        when(userRepository.save(any())).thenThrow(new IllegalArgumentException(expectedMessage));
+        when(userRepository.save(any())).thenThrow(new RuntimeException(expectedMessage));
 
         assertThrows(
-                IllegalArgumentException.class,
+                RuntimeException.class,
                 () -> manageUserService.create(newUser),
                 expectedMessage
         );
