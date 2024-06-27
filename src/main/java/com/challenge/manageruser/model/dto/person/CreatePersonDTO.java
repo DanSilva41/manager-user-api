@@ -1,5 +1,7 @@
 package com.challenge.manageruser.model.dto.person;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -7,18 +9,19 @@ import org.apache.commons.text.WordUtils;
 
 import java.util.Objects;
 
+@JsonNaming(SnakeCaseStrategy.class)
 public record CreatePersonDTO(
-        @NotBlank(message = "First name can not be empty")
-        @Size(min = 2, max = 60)
+        @NotBlank(message = "Cannot be empty")
+        @Size(min = 2, max = 60, message = "Must have between {min} and {max} characters")
         String firstName,
 
-        @NotBlank(message = "Last name can not be empty")
-        @Size(min = 2, max = 60)
+        @NotBlank(message = "Cannot be empty")
+        @Size(min = 2, max = 60, message = "Must have between {min} and {max} characters")
         String lastName,
 
         @Email
-        @NotBlank(message = "Email can not be empty")
-        @Size(min = 5, max = 100)
+        @NotBlank(message = "Cannot be empty")
+        @Size(min = 5, max = 100, message = "Must have between {min} and {max} characters")
         String email
 ) {
 

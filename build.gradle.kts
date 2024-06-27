@@ -26,6 +26,7 @@ repositories {
 
 val commonsLang3Version: String by project
 val commonsTextVersion: String by project
+val googleGuavaVersion: String by project
 val dataFakerVersion: String by project
 
 dependencies {
@@ -37,6 +38,7 @@ dependencies {
 	implementation("org.flywaydb:flyway-database-postgresql")
 	implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
 	implementation("org.apache.commons:commons-text:${commonsTextVersion}")
+	implementation("com.google.guava:guava:${googleGuavaVersion}")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	runtimeOnly("org.postgresql:postgresql")
