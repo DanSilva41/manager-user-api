@@ -1,5 +1,6 @@
 package com.challenge.manageruser.model.dto.user;
 
+import com.challenge.manageruser.model.dto.department.DetailDepartmentDTO;
 import com.challenge.manageruser.model.dto.person.DetailPersonDTO;
 import com.challenge.manageruser.support.builder.dto.DetailUserBuilder;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
@@ -13,6 +14,7 @@ public record DetailUserDTO(
         String username,
         Boolean active,
         DetailPersonDTO person,
+        DetailDepartmentDTO department,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

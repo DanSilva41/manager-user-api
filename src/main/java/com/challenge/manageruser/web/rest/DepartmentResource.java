@@ -2,7 +2,7 @@ package com.challenge.manageruser.web.rest;
 
 import com.challenge.manageruser.model.dto.department.CreateDepartmentDTO;
 import com.challenge.manageruser.model.dto.department.DetailDepartmentDTO;
-import com.challenge.manageruser.service.ManageDepartmentService;
+import com.challenge.manageruser.service.department.ManageDepartmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

@@ -1,4 +1,4 @@
-package com.challenge.manageruser.service;
+package com.challenge.manageruser.service.department;
 
 import com.challenge.manageruser.exception.InvalidDepartmentException;
 import com.challenge.manageruser.model.dto.department.CreateDepartmentDTO;

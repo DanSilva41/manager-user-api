@@ -1,6 +1,7 @@
 package com.challenge.manageruser.model.entity.security;
 
 import com.challenge.manageruser.model.entity.BaseEntity;
+import com.challenge.manageruser.model.entity.backing.Department;
 import com.challenge.manageruser.model.entity.backing.Person;
 import com.challenge.manageruser.support.builder.entity.UserBuilder;
 import jakarta.persistence.CascadeType;
@@ -11,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -44,19 +46,29 @@ public class User extends BaseEntity {
     @Column(name = "active", nullable = false)
     private boolean active;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // TODO avaliar CascadeType.ALL
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "person_code", nullable = false, unique = true)
     private Person person;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_name", nullable = false)
+    private Department department;
 
     public User() {
         // default constructor
     }
 
-    public User(final String username, final String password, final boolean active, final Person person) {
+    public User(final String username,
+                final String password,
+                final boolean active,
+                final Person person,
+                final Department department
+    ) {
         this.username = username;
         this.password = password;
         this.active = active;
         this.person = person;
+        this.department = department;
     }
 
     @Override
@@ -80,6 +92,7 @@ public class User extends BaseEntity {
                 ", password='" + password +
                 ", active=" + active +
                 ", person=" + person +
+                ", department=" + department +
                 ", createdAt=" + getCreatedAt() +
                 ", updatedAt=" + getUpdatedAt() +
                 '}';
@@ -115,6 +128,14 @@ public class User extends BaseEntity {
 
     public Person getPerson() {
         return person;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 
     public static UserBuilder builder() {

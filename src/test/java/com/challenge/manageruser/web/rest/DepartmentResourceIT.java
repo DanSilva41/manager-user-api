@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -79,7 +80,9 @@ class DepartmentResourceIT extends AbstractIntegrationTest {
         mockMvc.perform(post(DEPARTMENT_V1_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload)
-                ).andExpect(status().isCreated())
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("FINANCEIRO"))
                 .andExpect(jsonPath("$.description").value("Setor responsável pela contabilidade e prestação de contas"))
                 .andExpect(jsonPath("$.created_at").exists())

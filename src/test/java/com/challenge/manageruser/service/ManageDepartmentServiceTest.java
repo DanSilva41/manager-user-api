@@ -5,6 +5,7 @@ import com.challenge.manageruser.model.dto.department.CreateDepartmentDTO;
 import com.challenge.manageruser.model.dto.department.DetailDepartmentDTO;
 import com.challenge.manageruser.model.entity.backing.Department;
 import com.challenge.manageruser.repository.DepartmentRepository;
+import com.challenge.manageruser.service.department.ManageDepartmentService;
 import com.challenge.manageruser.support.mapper.DepartmentMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
