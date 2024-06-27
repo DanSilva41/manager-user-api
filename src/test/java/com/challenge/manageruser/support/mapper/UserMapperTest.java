@@ -3,6 +3,7 @@ package com.challenge.manageruser.support.mapper;
 import com.challenge.manageruser.model.dto.person.CreatePersonDTO;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
+import com.challenge.manageruser.model.entity.backing.Department;
 import com.challenge.manageruser.model.entity.backing.Person;
 import com.challenge.manageruser.model.entity.security.User;
 import org.junit.jupiter.api.DisplayName;
@@ -30,9 +31,13 @@ class UserMapperTest {
         final CreatePersonDTO newPerson = new CreatePersonDTO(
                 faker.name().firstName(), faker.name().lastName(), faker.internet().emailAddress()
         );
-        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), newPerson);
+        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), faker.commerce().department(), newPerson);
+        final Department department = Department.builder()
+                .name(newUser.departmentName())
+                .description(faker.marketing().buzzwords())
+                .build();
 
-        final User mappedUser = assertDoesNotThrow(() -> UserMapper.toUser(newUser));
+        final User mappedUser = assertDoesNotThrow(() -> UserMapper.toUser(newUser, department));
         assertNotNull(mappedUser);
         assertEquals(newUser.username(), mappedUser.getUsername());
         assertEquals(newUser.password(), mappedUser.getPassword());
@@ -40,6 +45,9 @@ class UserMapperTest {
         assertEquals(newUser.person().firstName(), mappedUser.getPerson().getFirstName());
         assertEquals(newUser.person().lastName(), mappedUser.getPerson().getLastName());
         assertEquals(newUser.person().email(), mappedUser.getPerson().getEmail());
+        assertNotNull(mappedUser.getDepartment());
+        assertEquals(department.getName(), mappedUser.getDepartment().getName());
+        assertEquals(department.getDescription(), mappedUser.getDepartment().getDescription());
     }
 
     @DisplayName("""
@@ -58,25 +66,36 @@ class UserMapperTest {
                         .lastName(faker.name().lastName())
                         .email(faker.internet().emailAddress())
                         .build())
+                .department(Department.builder()
+                        .name(faker.commerce().department())
+                        .name(faker.marketing().buzzwords())
+                        .build())
                 .build();
         ReflectionTestUtils.setField(user, "createdAt", Instant.now());
         ReflectionTestUtils.setField(user, "updatedAt", Instant.now());
         ReflectionTestUtils.setField(user.getPerson(), "createdAt", Instant.now());
         ReflectionTestUtils.setField(user.getPerson(), "updatedAt", Instant.now());
+        ReflectionTestUtils.setField(user.getDepartment(), "createdAt", Instant.now());
+        ReflectionTestUtils.setField(user.getDepartment(), "updatedAt", Instant.now());
 
         final DetailUserDTO mappedDetailUser = assertDoesNotThrow(() -> UserMapper.toDetailUser(user));
         assertNotNull(mappedDetailUser);
         assertEquals(user.getCode(), mappedDetailUser.code());
         assertEquals(user.getUsername(), mappedDetailUser.username());
         assertEquals(user.isActive(), mappedDetailUser.active());
-        assertNotNull(mappedDetailUser.person());
         assertEquals(LocalDateTime.ofInstant(user.getCreatedAt(), ZoneOffset.UTC), mappedDetailUser.createdAt());
         assertEquals(LocalDateTime.ofInstant(user.getUpdatedAt(), ZoneOffset.UTC), mappedDetailUser.updatedAt());
+        assertNotNull(mappedDetailUser.person());
         assertEquals(user.getPerson().getCode(), mappedDetailUser.person().code());
         assertEquals(user.getPerson().getFirstName(), mappedDetailUser.person().firstName());
         assertEquals(user.getPerson().getLastName(), mappedDetailUser.person().lastName());
         assertEquals(user.getPerson().getEmail(), mappedDetailUser.person().email());
         assertEquals(LocalDateTime.ofInstant(user.getPerson().getCreatedAt(), ZoneOffset.UTC), mappedDetailUser.person().createdAt());
         assertEquals(LocalDateTime.ofInstant(user.getPerson().getUpdatedAt(), ZoneOffset.UTC), mappedDetailUser.person().updatedAt());
+        assertNotNull(mappedDetailUser.department());
+        assertEquals(user.getDepartment().getName(), mappedDetailUser.department().name());
+        assertEquals(user.getDepartment().getDescription(), mappedDetailUser.department().description());
+        assertEquals(LocalDateTime.ofInstant(user.getDepartment().getCreatedAt(), ZoneOffset.UTC), mappedDetailUser.department().createdAt());
+        assertEquals(LocalDateTime.ofInstant(user.getDepartment().getUpdatedAt(), ZoneOffset.UTC), mappedDetailUser.department().updatedAt());
     }
 }

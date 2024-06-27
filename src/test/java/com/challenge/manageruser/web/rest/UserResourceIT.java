@@ -63,16 +63,18 @@ class UserResourceIT extends AbstractIntegrationTest {
 
     @DisplayName("""
             DADO um novo usuário
-            QUANDO for válido e não existente com o mesmo email
+            QUANDO for válido e não existente com o mesmo username e email
             DEVE criar o usuário
             E retornar os detalhes do mesmo
             """)
+    @Sql("/db/scripts/created-departments.sql")
     @Test
     void shouldCreateNewUser() throws Exception {
         final var validPayload = """
                 {
                   "username": "user001",
                   "password": "p@ssw0rd",
+                  "department_name": "FINANCEIRO",
                   "person": {
                     "first_name": "John",
                     "last_name": "Allister",
@@ -96,7 +98,12 @@ class UserResourceIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.person.last_name").value("Allister"))
                 .andExpect(jsonPath("$.person.email").value("john.allister@gmail.com"))
                 .andExpect(jsonPath("$.person.created_at").exists())
-                .andExpect(jsonPath("$.person.updated_at").exists());
+                .andExpect(jsonPath("$.person.updated_at").exists())
+                .andExpect(jsonPath("$.department").exists())
+                .andExpect(jsonPath("$.department.name").value("FINANCEIRO"))
+                .andExpect(jsonPath("$.department.description").value("Setor responsável pela contabilidade e prestação de contas"))
+                .andExpect(jsonPath("$.department.created_at").exists())
+                .andExpect(jsonPath("$.department.updated_at").exists());
 
         Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate,
@@ -121,11 +128,82 @@ class UserResourceIT extends AbstractIntegrationTest {
 
     @DisplayName("""
             DADO um novo usuário
+            QUANDO for válido porém com username já existente
+            NÃO DEVE criar o usuário
+            E retornar 400 (BAD REQUEST)
+            """)
+    @Sql("/db/scripts/already-existent-user.sql")
+    @Test
+    void shouldFailInUserCreationWhenAlreadyExistsUserByUsername() throws Exception {
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "security.user",
+                """
+                        username = 'user001'
+                        AND active = true
+                        """
+        ));
+
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "backing.person",
+                """
+                        first_name = 'John'
+                        AND last_name = 'Allister'
+                        AND email = 'john.allister@gmail.com'
+                        """
+        ));
+
+        final var validPayload = """
+                {
+                  "username": "user001",
+                  "password": "p@ssw0rd",
+                  "department_name": "FINANCEIRO",
+                  "person": {
+                    "first_name": "Paul",
+                    "last_name": "Walker",
+                    "email": "paul.walker@gmail.com"
+                  }
+                }
+                """;
+
+        mockMvc.perform(post(USER_V1_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validPayload)
+                ).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid request"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").value("There's already a user with this username or person email"))
+                .andExpect(jsonPath("$.instance").value(USER_V1_ENDPOINT))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "security.user",
+                """
+                        username = 'user001'
+                        AND active = true
+                        """
+        ));
+
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "backing.person",
+                """
+                        first_name = 'John'
+                        AND last_name = 'Allister'
+                        AND email = 'john.allister@gmail.com'
+                        """
+        ));
+    }
+
+    @DisplayName("""
+            DADO um novo usuário
             QUANDO for válido porém com email já existente
             NÃO DEVE criar o usuário
             E retornar 400 (BAD REQUEST)
             """)
-    @Sql("/db/scripts/already-existent-email-user.sql")
+    @Sql("/db/scripts/already-existent-user.sql")
     @Test
     void shouldFailInUserCreationWhenAlreadyExistsUserByEmail() throws Exception {
         Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
@@ -151,6 +229,7 @@ class UserResourceIT extends AbstractIntegrationTest {
                 {
                   "username": "user001",
                   "password": "p@ssw0rd",
+                  "department_name": "FINANCEIRO",
                   "person": {
                     "first_name": "John",
                     "last_name": "Allister",
@@ -165,7 +244,7 @@ class UserResourceIT extends AbstractIntegrationTest {
                 ).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Invalid request"))
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value("There's already a user with this email"))
+                .andExpect(jsonPath("$.detail").value("There's already a user with this username or person email"))
                 .andExpect(jsonPath("$.instance").value(USER_V1_ENDPOINT))
                 .andExpect(jsonPath("$.timestamp").exists());
 
@@ -195,6 +274,7 @@ class UserResourceIT extends AbstractIntegrationTest {
                                 {
                                   "username": "  ",
                                   "password": "  ",
+                                  "department_name": "  ",
                                   "person": {
                                     "first_name": "  ",
                                     "last_name": "  ",
@@ -207,6 +287,8 @@ class UserResourceIT extends AbstractIntegrationTest {
                                 "username: Must have between 5 and 20 characters",
                                 "password: Cannot be empty",
                                 "password: Must have between 6 and 60 characters",
+                                "department_name: Cannot be empty",
+                                "department_name: Must have between 3 and 60 characters",
                                 "person.first_name: Cannot be empty",
                                 "person.last_name: Cannot be empty",
                                 "person.email: Cannot be empty",
@@ -218,12 +300,14 @@ class UserResourceIT extends AbstractIntegrationTest {
                                 {
                                   "username": null,
                                   "password": null,
+                                  "department_name": null,
                                   "person": null
                                 }
                                 """,
                         List.of(
                                 "username: Cannot be empty",
                                 "password: Cannot be empty",
+                                "department_name: Cannot be empty",
                                 "person: Cannot be null"
                         )
                 ),
@@ -231,6 +315,7 @@ class UserResourceIT extends AbstractIntegrationTest {
                                 {
                                   "username": "user",
                                   "password": "p@ssw",
+                                  "department_name": "GL",
                                   "person": {
                                     "first_name": "J",
                                     "last_name": "A",
@@ -241,6 +326,7 @@ class UserResourceIT extends AbstractIntegrationTest {
                         List.of(
                                 "username: Must have between 5 and 20 characters",
                                 "password: Must have between 6 and 60 characters",
+                                "department_name: Must have between 3 and 60 characters",
                                 "person.first_name: Must have between 2 and 60 characters",
                                 "person.last_name: Must have between 2 and 60 characters",
                                 "person.email: Must have between 5 and 100 characters",
@@ -251,6 +337,7 @@ class UserResourceIT extends AbstractIntegrationTest {
                                 {
                                   "username": "S!Uz-%nqgmK%uQ4QC2&)m",
                                   "password": "4G;KU5;2SZYRu,XBey3am+[F0du1hf8bUw_,*n@YqXiqC2T*L_c[$_V?6a,-*",
+                                  "department_name": "Lorem ipsum dolor sit amet, consectetur adipiscing elit block",
                                   "person": {
                                     "first_name": "mbJqEanCYNxdVPdbqdpdJvjeWTXnGhVbUqTYwtHVjYQnaQcLnvPDqnwDkSUXN",
                                     "last_name": "cNrgjjURHcfYeaPSFqLBdqKqHaywpYDYCMUpEkwWiHqDSRNXnFLeGEPBGXFXx",
@@ -261,6 +348,7 @@ class UserResourceIT extends AbstractIntegrationTest {
                         List.of(
                                 "username: Must have between 5 and 20 characters",
                                 "password: Must have between 6 and 60 characters",
+                                "department_name: Must have between 3 and 60 characters",
                                 "person.first_name: Must have between 2 and 60 characters",
                                 "person.last_name: Must have between 2 and 60 characters",
                                 "person.email: Must have between 5 and 100 characters",
