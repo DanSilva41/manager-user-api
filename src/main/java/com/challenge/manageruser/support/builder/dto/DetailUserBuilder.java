@@ -1,5 +1,6 @@
 package com.challenge.manageruser.support.builder.dto;
 
+import com.challenge.manageruser.model.dto.department.DetailDepartmentDTO;
 import com.challenge.manageruser.model.dto.person.DetailPersonDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
 
@@ -10,13 +11,13 @@ public class DetailUserBuilder {
     private Integer code;
     private String username;
     private Boolean active;
-
     private DetailPersonDTO person;
+    private DetailDepartmentDTO department;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public DetailUserDTO build() {
-        return new DetailUserDTO(code, username, active, person, createdAt, updatedAt);
+        return new DetailUserDTO(code, username, active, person, department, createdAt, updatedAt);
     }
 
     public DetailUserBuilder code(final Integer code) {
@@ -36,6 +37,11 @@ public class DetailUserBuilder {
 
     public DetailUserBuilder person(final DetailPersonDTO person) {
         this.person = person;
+        return this;
+    }
+
+    public DetailUserBuilder department(final DetailDepartmentDTO department) {
+        this.department = department;
         return this;
     }
 

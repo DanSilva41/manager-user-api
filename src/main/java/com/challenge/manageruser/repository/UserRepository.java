@@ -11,5 +11,5 @@ public interface UserRepository extends org.springframework.data.repository.Repo
     User save(User user);
 
     @Transactional(readOnly = true)
-    boolean existsByPersonEmail(String email);
+    boolean existsByUsernameOrPersonEmail(String username, String email);
 }

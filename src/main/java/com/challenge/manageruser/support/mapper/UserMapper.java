@@ -1,9 +1,8 @@
 package com.challenge.manageruser.support.mapper;
 
-import com.challenge.manageruser.model.dto.person.DetailPersonDTO;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
-import com.challenge.manageruser.model.entity.backing.Person;
+import com.challenge.manageruser.model.entity.backing.Department;
 import com.challenge.manageruser.model.entity.security.User;
 
 import java.time.LocalDateTime;
@@ -15,15 +14,12 @@ public class UserMapper {
         throw new IllegalAccessException("Do not instantiate this class, use statically");
     }
 
-    public static User toUser(final CreateUserDTO newUser) {
+    public static User toUser(final CreateUserDTO newUser, final Department department) {
         return User.builder()
                 .username(newUser.username())
                 .password(newUser.password())
-                .person(Person.builder()
-                        .firstName(newUser.person().firstName())
-                        .lastName(newUser.person().lastName())
-                        .email(newUser.person().email())
-                        .build())
+                .person(PersonMapper.toPerson(newUser.person()))
+                .department(department)
                 .active(true)
                 .build();
     }
@@ -33,14 +29,8 @@ public class UserMapper {
                 .code(user.getCode())
                 .username(user.getUsername())
                 .active(user.isActive())
-                .person(DetailPersonDTO.builder()
-                        .code(user.getPerson().getCode())
-                        .firstName(user.getPerson().getFirstName())
-                        .lastName(user.getPerson().getLastName())
-                        .email(user.getPerson().getEmail())
-                        .createdAt(LocalDateTime.ofInstant(user.getPerson().getCreatedAt(), ZoneOffset.UTC))
-                        .updatedAt(LocalDateTime.ofInstant(user.getPerson().getUpdatedAt(), ZoneOffset.UTC))
-                        .build())
+                .person(PersonMapper.toDetailPerson(user.getPerson()))
+                .department(DepartmentMapper.toDetailDepartment(user.getDepartment()))
                 .createdAt(LocalDateTime.ofInstant(user.getCreatedAt(), ZoneOffset.UTC))
                 .updatedAt(LocalDateTime.ofInstant(user.getUpdatedAt(), ZoneOffset.UTC))
                 .build();

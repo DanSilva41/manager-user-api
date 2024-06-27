@@ -17,7 +17,7 @@ public class Department extends BaseEntity {
 
     @Id
     @NotBlank
-    @Size(min = 2, max = 60)
+    @Size(min = 3, max = 60)
     @Column(name = "name", length = 60, nullable = false)
     private String name;
 

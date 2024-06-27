@@ -20,6 +20,10 @@ public record CreateUserDTO(
         @Size(min = 6, max = 60, message = "Must have between {min} and {max} characters")
         String password,
 
+        @NotBlank(message = "Cannot be empty")
+        @Size(min = 3, max = 60, message = "Must have between {min} and {max} characters")
+        String departmentName,
+
         @Valid
         @NotNull(message = "Cannot be null")
         CreatePersonDTO person
@@ -30,5 +34,12 @@ public record CreateUserDTO(
         if (Objects.nonNull(username) && !username.isEmpty())
             return username.toLowerCase().trim();
         return username;
+    }
+
+    @Override
+    public String departmentName() {
+        if (Objects.nonNull(departmentName) && !departmentName.isEmpty())
+            return departmentName.toUpperCase().trim();
+        return departmentName;
     }
 }
