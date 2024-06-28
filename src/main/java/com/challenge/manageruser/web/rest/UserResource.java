@@ -4,6 +4,7 @@ import com.challenge.manageruser.model.dto.FilterDTO;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
 import com.challenge.manageruser.model.dto.user.SimpleUserDTO;
+import com.challenge.manageruser.model.dto.user.UpdateUserDTO;
 import com.challenge.manageruser.service.user.FindUserService;
 import com.challenge.manageruser.service.user.ManageUserService;
 import com.challenge.manageruser.web.common.SnakePage;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,7 +58,7 @@ public class UserResource {
 
     @GetMapping("/{code}")
     public ResponseEntity<DetailUserDTO> getByCode(@PathVariable final Integer code) {
-        final DetailUserDTO detailUser = findUserService.getByCode(code);
+        final DetailUserDTO detailUser = findUserService.getDetailByCode(code);
         return ResponseEntity.ok(detailUser);
     }
 
@@ -64,5 +66,12 @@ public class UserResource {
     public ResponseEntity<Void> deleteByCode(@PathVariable final Integer code) {
         manageUserService.delete(code);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{code}")
+    public ResponseEntity<DetailUserDTO> update(@PathVariable final Integer code,
+                                                @Valid @RequestBody final UpdateUserDTO updateUser) {
+        final var updatedUser = manageUserService.update(code, updateUser);
+        return ResponseEntity.ok(updatedUser);
     }
 }

@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +45,9 @@ class ManageUserServiceTest {
 
     @Mock
     private FindDepartmentService findDepartmentService;
+
+    @Mock
+    private FindUserService findUserService;
 
     @DisplayName("""
             DADO um novo usuário
@@ -70,7 +74,7 @@ class ManageUserServiceTest {
         ReflectionTestUtils.setField(expectedUser.getPerson(), "createdAt", Instant.now());
         ReflectionTestUtils.setField(expectedUser.getPerson(), "updatedAt", Instant.now());
 
-        when(userRepository.existsByUsernameOrPersonEmail(any(), any())).thenReturn(false);
+        doNothing().when(findUserService).alreadyExists(any(), any());
         when(findDepartmentService.getByName(any())).thenReturn(department);
         when(userRepository.save(any())).thenReturn(expectedUser);
 
@@ -96,7 +100,7 @@ class ManageUserServiceTest {
         assertEquals(LocalDateTime.ofInstant(expectedUser.getDepartment().getCreatedAt(), ZoneOffset.UTC), savedDetailUser.department().createdAt());
         assertEquals(LocalDateTime.ofInstant(expectedUser.getDepartment().getUpdatedAt(), ZoneOffset.UTC), savedDetailUser.department().updatedAt());
 
-        verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
+        verify(findUserService, times(1)).alreadyExists(any(), any());
         verify(userRepository, times(1)).save(any());
     }
 
@@ -125,16 +129,17 @@ class ManageUserServiceTest {
         ReflectionTestUtils.setField(expectedUser.getPerson(), "createdAt", Instant.now());
         ReflectionTestUtils.setField(expectedUser.getPerson(), "updatedAt", Instant.now());
 
-        when(userRepository.existsByUsernameOrPersonEmail(any(), any())).thenReturn(true);
-
         final var expectedMessage = "There's already a user with this username or person email";
+        doThrow(new InvalidUserException(expectedMessage))
+                .when(findUserService).alreadyExists(any(), any());
+
         assertThrows(
                 InvalidUserException.class,
                 () -> manageUserService.create(newUser),
                 expectedMessage
         );
 
-        verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
+        verify(findUserService, times(1)).alreadyExists(any(), any());
         verify(userRepository, times(0)).save(any());
     }
 
@@ -163,16 +168,17 @@ class ManageUserServiceTest {
         ReflectionTestUtils.setField(expectedUser.getPerson(), "createdAt", Instant.now());
         ReflectionTestUtils.setField(expectedUser.getPerson(), "updatedAt", Instant.now());
 
-        when(userRepository.existsByUsernameOrPersonEmail(any(), any())).thenReturn(true);
-
         final var expectedMessage = "There's already a user with this username or person email";
+        doThrow(new InvalidUserException(expectedMessage))
+                .when(findUserService).alreadyExists(any(), any());
+
         assertThrows(
                 InvalidUserException.class,
                 () -> manageUserService.create(newUser),
                 expectedMessage
         );
 
-        verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
+        verify(findUserService, times(1)).alreadyExists(any(), any());
         verify(userRepository, times(0)).save(any());
     }
 
@@ -200,7 +206,7 @@ class ManageUserServiceTest {
         ReflectionTestUtils.setField(expectedUser.getPerson(), "updatedAt", Instant.now());
 
         final var expectedMessage = "ERROR: duplicate key violates unique constraint 'un_person_email'";
-        when(userRepository.existsByUsernameOrPersonEmail(any(), any())).thenReturn(false);
+        doNothing().when(findUserService).alreadyExists(any(), any());
         when(findDepartmentService.getByName(any())).thenReturn(department);
         when(userRepository.save(any())).thenThrow(new RuntimeException(expectedMessage));
 
@@ -210,7 +216,7 @@ class ManageUserServiceTest {
                 expectedMessage
         );
 
-        verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
+        verify(findUserService, times(1)).alreadyExists(any(), any());
         verify(userRepository, times(1)).save(any());
     }
 
@@ -221,14 +227,14 @@ class ManageUserServiceTest {
             """)
     @Test
     void shouldDeleteUser() {
-        when(userRepository.existsByCode(any())).thenReturn(true);
+        doNothing().when(findUserService).validateIfNotExists(any());
         doNothing().when(userRepository).deleteByCode(any());
 
         assertDoesNotThrow(() ->
                 manageUserService.delete(1)
         );
 
-        verify(userRepository, times(1)).existsByCode(any());
+        verify(findUserService, times(1)).validateIfNotExists(any());
         verify(userRepository, times(1)).deleteByCode(any());
     }
 
@@ -240,16 +246,17 @@ class ManageUserServiceTest {
     @Test
     void shouldThrowWhenUserNotFoundInDelete() {
         final var userCode = 1;
-        when(userRepository.existsByCode(any())).thenReturn(false);
-
         final var expectedMessage = "User with identifier %d not found".formatted(userCode);
+        doThrow(new InvalidUserException(expectedMessage))
+                .when(findUserService).validateIfNotExists(any());
+
         assertThrows(
                 NotFoundUserException.class,
                 () -> manageUserService.delete(userCode),
                 expectedMessage
         );
 
-        verify(userRepository, times(1)).existsByCode(any());
+        verify(findUserService, times(1)).validateIfNotExists(any());
         verify(userRepository, times(0)).deleteByCode(any());
     }
 }
