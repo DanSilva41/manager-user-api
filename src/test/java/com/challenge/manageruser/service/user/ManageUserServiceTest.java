@@ -1,4 +1,4 @@
-package com.challenge.manageruser.service;
+package com.challenge.manageruser.service.user;
 
 import com.challenge.manageruser.exception.InvalidUserException;
 import com.challenge.manageruser.model.dto.person.CreatePersonDTO;

@@ -1,7 +1,7 @@
 package com.challenge.manageruser;
 
 import com.challenge.manageruser.repository.UserRepository;
-import com.challenge.manageruser.service.ManageUserService;
+import com.challenge.manageruser.service.user.ManageUserService;
 import com.challenge.manageruser.web.rest.UserResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

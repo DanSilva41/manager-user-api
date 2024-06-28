@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class UserResourceIT extends AbstractIntegrationTest {
+class CreateUserResourceIT extends AbstractIntegrationTest {
 
     private static final String USER_V1_ENDPOINT = "/v1/user";
 
@@ -30,7 +30,7 @@ class UserResourceIT extends AbstractIntegrationTest {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    UserResourceIT(final MockMvc mockMvc, final JdbcTemplate jdbcTemplate) {
+    CreateUserResourceIT(final MockMvc mockMvc, final JdbcTemplate jdbcTemplate) {
         this.mockMvc = mockMvc;
         this.jdbcTemplate = jdbcTemplate;
     }
