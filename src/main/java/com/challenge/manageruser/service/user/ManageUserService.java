@@ -1,6 +1,7 @@
 package com.challenge.manageruser.service.user;
 
 import com.challenge.manageruser.exception.InvalidUserException;
+import com.challenge.manageruser.exception.NotFoundUserException;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
 import com.challenge.manageruser.repository.UserRepository;
@@ -34,9 +35,20 @@ public class ManageUserService {
         return UserMapper.toDetailUser(savedUser);
     }
 
+    public void delete(final Integer code) {
+        validateIfNotExists(code);
+        userRepository.deleteByCode(code);
+    }
+
     private void validateIfExists(@Valid final CreateUserDTO newUser) {
         if (userRepository.existsByUsernameOrPersonEmail(newUser.username(), newUser.person().email())) {
             throw new InvalidUserException("There's already a user with this username or person email");
+        }
+    }
+
+    private void validateIfNotExists(final Integer code) {
+        if (!userRepository.existsByCode(code)) {
+            throw new NotFoundUserException("User with identifier %d not found".formatted(code));
         }
     }
 }
