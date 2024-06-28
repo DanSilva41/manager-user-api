@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +40,7 @@ public class UserResource {
         final var savedUser = manageUserService.create(newUser);
 
         return ResponseEntity
-                .created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.code()).toUri())
+                .created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{code}").buildAndExpand(savedUser.code()).toUri())
                 .body(savedUser);
     }
 
@@ -50,5 +51,11 @@ public class UserResource {
     ) {
         final Page<SimpleUserDTO> foundUsers = findUserService.getAllByFilter(new FilterDTO(page, size));
         return ResponseEntity.ok(new SnakePage<>(foundUsers));
+    }
+
+    @GetMapping("/{code}")
+    public ResponseEntity<DetailUserDTO> getByCode(@PathVariable final Integer code) {
+        final DetailUserDTO detailUser = findUserService.getByCode(code);
+        return ResponseEntity.ok(detailUser);
     }
 }
