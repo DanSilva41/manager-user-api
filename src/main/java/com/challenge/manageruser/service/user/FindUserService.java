@@ -1,6 +1,8 @@
 package com.challenge.manageruser.service.user;
 
+import com.challenge.manageruser.exception.NotFoundUserException;
 import com.challenge.manageruser.model.dto.FilterDTO;
+import com.challenge.manageruser.model.dto.user.DetailUserDTO;
 import com.challenge.manageruser.model.dto.user.SimpleUserDTO;
 import com.challenge.manageruser.repository.UserRepository;
 import com.challenge.manageruser.support.mapper.UserMapper;
@@ -23,5 +25,11 @@ public class FindUserService {
         final var pageable = PageRequest.of(filter.page(), filter.size());
         return userRepository.findAll(pageable)
                 .map(UserMapper::toSimpleUser);
+    }
+
+    public DetailUserDTO getByCode(final Integer code) {
+        return userRepository.findByCode(code)
+                .map(UserMapper::toDetailUser)
+                .orElseThrow(() -> new NotFoundUserException("User with identifier %d not found".formatted(code)));
     }
 }

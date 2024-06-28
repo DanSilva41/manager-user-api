@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends org.springframework.data.repository.Repository<User, Integer> {
 
@@ -17,4 +19,7 @@ public interface UserRepository extends org.springframework.data.repository.Repo
 
     @Transactional(readOnly = true)
     Page<User> findAll(Pageable pageable);
+
+    @Transactional(readOnly = true)
+    Optional<User> findByCode(Integer code);
 }
