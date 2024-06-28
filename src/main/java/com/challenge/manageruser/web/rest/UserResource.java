@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +37,7 @@ public class UserResource {
     }
 
     @PostMapping
-    public ResponseEntity<DetailUserDTO> createUser(@Valid @RequestBody final CreateUserDTO newUser) {
+    public ResponseEntity<DetailUserDTO> create(@Valid @RequestBody final CreateUserDTO newUser) {
         final var savedUser = manageUserService.create(newUser);
 
         return ResponseEntity
@@ -57,5 +58,11 @@ public class UserResource {
     public ResponseEntity<DetailUserDTO> getByCode(@PathVariable final Integer code) {
         final DetailUserDTO detailUser = findUserService.getByCode(code);
         return ResponseEntity.ok(detailUser);
+    }
+
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Void> deleteByCode(@PathVariable final Integer code) {
+        manageUserService.delete(code);
+        return ResponseEntity.noContent().build();
     }
 }

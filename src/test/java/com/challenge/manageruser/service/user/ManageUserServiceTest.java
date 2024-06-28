@@ -1,6 +1,7 @@
 package com.challenge.manageruser.service.user;
 
 import com.challenge.manageruser.exception.InvalidUserException;
+import com.challenge.manageruser.exception.NotFoundUserException;
 import com.challenge.manageruser.model.dto.person.CreatePersonDTO;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -210,5 +212,44 @@ class ManageUserServiceTest {
 
         verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
         verify(userRepository, times(1)).save(any());
+    }
+
+    @DisplayName("""
+            DADO uma exclusão de usuário
+            QUANDO for existente
+            DEVE excluí-lo da base de dados
+            """)
+    @Test
+    void shouldDeleteUser() {
+        when(userRepository.existsByCode(any())).thenReturn(true);
+        doNothing().when(userRepository).deleteByCode(any());
+
+        assertDoesNotThrow(() ->
+                manageUserService.delete(1)
+        );
+
+        verify(userRepository, times(1)).existsByCode(any());
+        verify(userRepository, times(1)).deleteByCode(any());
+    }
+
+    @DisplayName("""
+            DADO uma exclusão de usuário
+            QUANDO não for encontrado por identificador único
+            DEVE lançar exceção
+            """)
+    @Test
+    void shouldThrowWhenUserNotFoundInDelete() {
+        final var userCode = 1;
+        when(userRepository.existsByCode(any())).thenReturn(false);
+
+        final var expectedMessage = "User with identifier %d not found".formatted(userCode);
+        assertThrows(
+                NotFoundUserException.class,
+                () -> manageUserService.delete(userCode),
+                expectedMessage
+        );
+
+        verify(userRepository, times(1)).existsByCode(any());
+        verify(userRepository, times(0)).deleteByCode(any());
     }
 }

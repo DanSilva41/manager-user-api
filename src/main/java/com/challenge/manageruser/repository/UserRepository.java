@@ -14,8 +14,14 @@ public interface UserRepository extends org.springframework.data.repository.Repo
     @Transactional
     User save(User user);
 
+    @Transactional
+    void deleteByCode(Integer code);
+
     @Transactional(readOnly = true)
     boolean existsByUsernameOrPersonEmail(String username, String email);
+
+    @Transactional(readOnly = true)
+    boolean existsByCode(Integer code);
 
     @Transactional(readOnly = true)
     Page<User> findAll(Pageable pageable);
