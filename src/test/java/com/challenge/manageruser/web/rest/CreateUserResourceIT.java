@@ -74,7 +74,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                 {
                   "username": "user001",
                   "password": "p@ssw0rd",
-                  "department_name": "FINANCEIRO",
+                  "department_code": 1,
                   "person": {
                     "first_name": "John",
                     "last_name": "Allister",
@@ -158,7 +158,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                 {
                   "username": "user001",
                   "password": "p@ssw0rd",
-                  "department_name": "FINANCEIRO",
+                  "department_code": 1,
                   "person": {
                     "first_name": "Paul",
                     "last_name": "Walker",
@@ -229,7 +229,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                 {
                   "username": "user001",
                   "password": "p@ssw0rd",
-                  "department_name": "FINANCEIRO",
+                  "department_code": 1,
                   "person": {
                     "first_name": "John",
                     "last_name": "Allister",
@@ -268,13 +268,66 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
         ));
     }
 
+    @DisplayName("""
+            DADO um novo usuário
+            QUANDO for válido porém com identificador de departamento não existente
+            NÃO DEVE criar o usuário
+            E retornar 400 (BAD REQUEST)
+            """)
+    @Sql("/db/scripts/created-departments.sql")
+    @Test
+    void shouldFailInUserCreationWhenDepartmentNotFound() throws Exception {
+        final var departmentCode = 3;
+        final var validPayload = """
+                {
+                  "username": "user001",
+                  "password": "p@ssw0rd",
+                  "department_code": %d,
+                  "person": {
+                    "first_name": "Paul",
+                    "last_name": "Walker",
+                    "email": "paul.walker@gmail.com"
+                  }
+                }
+                """.formatted(departmentCode);
+
+        mockMvc.perform(post(USER_V1_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validPayload)
+                ).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid request"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").value("Department %d not found".formatted(departmentCode)))
+                .andExpect(jsonPath("$.instance").value(USER_V1_ENDPOINT))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        Assertions.assertEquals(0, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "security.user",
+                """
+                        username = 'user001'
+                        AND active = true
+                        """
+        ));
+
+        Assertions.assertEquals(0, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "backing.person",
+                """
+                        first_name = 'John'
+                        AND last_name = 'Allister'
+                        AND email = 'john.allister@gmail.com'
+                        """
+        ));
+    }
+
     private static Stream<Arguments> invalidPayloadsUserCreation() {
         return Stream.of(
                 Arguments.of("""
                                 {
                                   "username": "  ",
                                   "password": "  ",
-                                  "department_name": "  ",
+                                  "department_code": -1,
                                   "person": {
                                     "first_name": "  ",
                                     "last_name": "  ",
@@ -287,8 +340,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                                 "username: Must have between 5 and 20 characters",
                                 "password: Cannot be empty",
                                 "password: Must have between 6 and 60 characters",
-                                "department_name: Cannot be empty",
-                                "department_name: Must have between 3 and 60 characters",
+                                "department_code: must be greater than 0",
                                 "person.first_name: Cannot be empty",
                                 "person.last_name: Cannot be empty",
                                 "person.email: Cannot be empty",
@@ -300,14 +352,14 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                                 {
                                   "username": null,
                                   "password": null,
-                                  "department_name": null,
+                                  "department_code": null,
                                   "person": null
                                 }
                                 """,
                         List.of(
                                 "username: Cannot be empty",
                                 "password: Cannot be empty",
-                                "department_name: Cannot be empty",
+                                "department_code: Cannot be null",
                                 "person: Cannot be null"
                         )
                 ),
@@ -315,7 +367,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                                 {
                                   "username": "user",
                                   "password": "p@ssw",
-                                  "department_name": "GL",
+                                  "department_code": -1,
                                   "person": {
                                     "first_name": "J",
                                     "last_name": "A",
@@ -326,7 +378,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                         List.of(
                                 "username: Must have between 5 and 20 characters",
                                 "password: Must have between 6 and 60 characters",
-                                "department_name: Must have between 3 and 60 characters",
+                                "department_code: must be greater than 0",
                                 "person.first_name: Must have between 2 and 60 characters",
                                 "person.last_name: Must have between 2 and 60 characters",
                                 "person.email: Must have between 5 and 100 characters",
@@ -337,7 +389,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                                 {
                                   "username": "S!Uz-%nqgmK%uQ4QC2&)m",
                                   "password": "4G;KU5;2SZYRu,XBey3am+[F0du1hf8bUw_,*n@YqXiqC2T*L_c[$_V?6a,-*",
-                                  "department_name": "Lorem ipsum dolor sit amet, consectetur adipiscing elit block",
+                                  "department_code": -1,
                                   "person": {
                                     "first_name": "mbJqEanCYNxdVPdbqdpdJvjeWTXnGhVbUqTYwtHVjYQnaQcLnvPDqnwDkSUXN",
                                     "last_name": "cNrgjjURHcfYeaPSFqLBdqKqHaywpYDYCMUpEkwWiHqDSRNXnFLeGEPBGXFXx",
@@ -348,7 +400,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                         List.of(
                                 "username: Must have between 5 and 20 characters",
                                 "password: Must have between 6 and 60 characters",
-                                "department_name: Must have between 3 and 60 characters",
+                                "department_code: must be greater than 0",
                                 "person.first_name: Must have between 2 and 60 characters",
                                 "person.last_name: Must have between 2 and 60 characters",
                                 "person.email: Must have between 5 and 100 characters",

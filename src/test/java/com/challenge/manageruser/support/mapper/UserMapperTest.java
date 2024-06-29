@@ -31,9 +31,9 @@ class UserMapperTest {
         final CreatePersonDTO newPerson = new CreatePersonDTO(
                 faker.name().firstName(), faker.name().lastName(), faker.internet().emailAddress()
         );
-        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), faker.commerce().department(), newPerson);
+        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), faker.number().positive(), newPerson);
         final Department department = Department.builder()
-                .name(newUser.departmentName())
+                .name(faker.commerce().department())
                 .description(faker.marketing().buzzwords())
                 .build();
 

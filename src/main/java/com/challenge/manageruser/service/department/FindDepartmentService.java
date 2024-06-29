@@ -17,10 +17,8 @@ public class FindDepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
-    public Department getByName(@NotNull final String departmentName) {
-        final var formattedDepartmentName = departmentName.toUpperCase().trim();
-
-        return departmentRepository.findByName(formattedDepartmentName)
-                .orElseThrow(() -> new NotFoundDepartmentException("Department %s not found".formatted(formattedDepartmentName)));
+    public Department getByCode(@NotNull final Integer departmentCode) {
+        return departmentRepository.findByCode(departmentCode)
+                .orElseThrow(() -> new NotFoundDepartmentException("Department %s not found".formatted(departmentCode)));
     }
 }

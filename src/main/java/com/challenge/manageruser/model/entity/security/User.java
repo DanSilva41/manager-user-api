@@ -51,7 +51,7 @@ public class User extends BaseEntity {
     private Person person;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_name", nullable = false)
+    @JoinColumn(name = "department_code", nullable = false)
     private Department department;
 
     public User() {

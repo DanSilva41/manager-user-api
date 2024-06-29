@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface DepartmentRepository extends org.springframework.data.repository.Repository<Department, String> {
+public interface DepartmentRepository extends org.springframework.data.repository.Repository<Department, Integer> {
 
     @Transactional
     Department save(Department department);
@@ -16,5 +16,5 @@ public interface DepartmentRepository extends org.springframework.data.repositor
     boolean existsByName(String name);
 
     @Transactional(readOnly = true)
-    Optional<Department> findByName(String name);
+    Optional<Department> findByCode(Integer code);
 }

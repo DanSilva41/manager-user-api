@@ -60,11 +60,13 @@ class ManageUserServiceTest {
         final CreatePersonDTO newPerson = new CreatePersonDTO(
                 faker.name().firstName(), faker.name().lastName(), faker.internet().emailAddress()
         );
-        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), faker.commerce().department(), newPerson);
+        final Integer departmentCode = faker.number().positive();
+        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), departmentCode, newPerson);
         final Department department = Department.builder()
-                .name(newUser.departmentName())
+                .name(faker.commerce().department())
                 .description(faker.marketing().buzzwords())
                 .build();
+        ReflectionTestUtils.setField(department, "code", departmentCode);
         ReflectionTestUtils.setField(department, "createdAt", Instant.now());
         ReflectionTestUtils.setField(department, "updatedAt", Instant.now());
 
@@ -75,7 +77,7 @@ class ManageUserServiceTest {
         ReflectionTestUtils.setField(expectedUser.getPerson(), "updatedAt", Instant.now());
 
         doNothing().when(findUserService).alreadyExists(any(), any());
-        when(findDepartmentService.getByName(any())).thenReturn(department);
+        when(findDepartmentService.getByCode(any())).thenReturn(department);
         when(userRepository.save(any())).thenReturn(expectedUser);
 
         final DetailUserDTO savedDetailUser = assertDoesNotThrow(() ->
@@ -115,11 +117,13 @@ class ManageUserServiceTest {
         final CreatePersonDTO newPerson = new CreatePersonDTO(
                 faker.name().firstName(), faker.name().lastName(), faker.internet().emailAddress()
         );
-        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), faker.commerce().department(), newPerson);
+        final Integer departmentCode = faker.number().positive();
+        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), departmentCode, newPerson);
         final Department department = Department.builder()
-                .name(newUser.departmentName())
+                .name(faker.commerce().department())
                 .description(faker.marketing().buzzwords())
                 .build();
+        ReflectionTestUtils.setField(department, "code", departmentCode);
         ReflectionTestUtils.setField(department, "createdAt", Instant.now());
         ReflectionTestUtils.setField(department, "updatedAt", Instant.now());
 
@@ -154,11 +158,13 @@ class ManageUserServiceTest {
         final CreatePersonDTO newPerson = new CreatePersonDTO(
                 faker.name().firstName(), faker.name().lastName(), faker.internet().emailAddress()
         );
-        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), faker.commerce().department(), newPerson);
+        final Integer departmentCode = faker.number().positive();
+        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), departmentCode, newPerson);
         final Department department = Department.builder()
-                .name(newUser.departmentName())
+                .name(faker.commerce().department())
                 .description(faker.marketing().buzzwords())
                 .build();
+        ReflectionTestUtils.setField(department, "code", departmentCode);
         ReflectionTestUtils.setField(department, "createdAt", Instant.now());
         ReflectionTestUtils.setField(department, "updatedAt", Instant.now());
 
@@ -193,9 +199,10 @@ class ManageUserServiceTest {
         final CreatePersonDTO newPerson = new CreatePersonDTO(
                 faker.name().firstName(), faker.name().lastName(), faker.internet().emailAddress()
         );
-        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), faker.commerce().department(), newPerson);
+        final Integer departmentCode = faker.number().positive();
+        final CreateUserDTO newUser = new CreateUserDTO(faker.internet().username(), faker.internet().password(), departmentCode, newPerson);
         final Department department = Department.builder()
-                .name(newUser.departmentName())
+                .name(faker.commerce().department())
                 .description(faker.marketing().buzzwords())
                 .build();
 
@@ -207,7 +214,7 @@ class ManageUserServiceTest {
 
         final var expectedMessage = "ERROR: duplicate key violates unique constraint 'un_person_email'";
         doNothing().when(findUserService).alreadyExists(any(), any());
-        when(findDepartmentService.getByName(any())).thenReturn(department);
+        when(findDepartmentService.getByCode(any())).thenReturn(department);
         when(userRepository.save(any())).thenThrow(new RuntimeException(expectedMessage));
 
         assertThrows(
@@ -247,7 +254,7 @@ class ManageUserServiceTest {
     void shouldThrowWhenUserNotFoundInDelete() {
         final var userCode = 1;
         final var expectedMessage = "User with identifier %d not found".formatted(userCode);
-        doThrow(new InvalidUserException(expectedMessage))
+        doThrow(new NotFoundUserException(expectedMessage))
                 .when(findUserService).validateIfNotExists(any());
 
         assertThrows(
