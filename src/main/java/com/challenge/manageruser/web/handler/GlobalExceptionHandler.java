@@ -4,6 +4,8 @@ import com.challenge.manageruser.exception.BusinessException;
 import com.google.common.collect.Iterables;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,8 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleRuntimeException(final RuntimeException exception) {
@@ -78,6 +82,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private ResponseEntity<Object> buildResponseProblemDetail(final ProblemDetail problemDetail) {
         problemDetail.setProperty("timestamp", Instant.now());
+
+        log.error("m=handle error, status={}, title={}, detail={}", problemDetail.getStatus(), problemDetail.getTitle(), problemDetail.getDetail());
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
     }
 }

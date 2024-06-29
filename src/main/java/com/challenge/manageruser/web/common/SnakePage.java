@@ -8,4 +8,8 @@ public class SnakePage<T> extends PagedModel<T> {
     public SnakePage(final Page<T> page) {
         super(page);
     }
+
+    public int totalElements() {
+        return super.getContent().size();
+    }
 }

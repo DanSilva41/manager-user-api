@@ -5,6 +5,7 @@ import com.challenge.manageruser.support.builder.dto.DetailDepartmentBuilder;
 import java.time.LocalDateTime;
 
 public record DetailDepartmentDTO(
+        Integer code,
         String name,
         String description,
         LocalDateTime createdAt,
