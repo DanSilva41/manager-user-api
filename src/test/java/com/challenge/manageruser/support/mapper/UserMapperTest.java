@@ -1,8 +1,10 @@
 package com.challenge.manageruser.support.mapper;
 
 import com.challenge.manageruser.model.dto.person.CreatePersonDTO;
+import com.challenge.manageruser.model.dto.person.UpdatePersonDTO;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
+import com.challenge.manageruser.model.dto.user.UpdateUserDTO;
 import com.challenge.manageruser.model.entity.backing.Department;
 import com.challenge.manageruser.model.entity.backing.Person;
 import com.challenge.manageruser.model.entity.security.User;
@@ -48,6 +50,52 @@ class UserMapperTest {
         assertNotNull(mappedUser.getDepartment());
         assertEquals(department.getName(), mappedUser.getDepartment().getName());
         assertEquals(department.getDescription(), mappedUser.getDepartment().getDescription());
+    }
+
+    @DisplayName("""
+            DADO a solicitação de atualização de usuário
+            QUANDO mapear os campos para a entidade User
+            DEVE refletir os valores corretamente
+            """)
+    @Test
+    void shouldMapperToUserFromUpdateUserDTO() {
+        final UpdatePersonDTO updatePerson = new UpdatePersonDTO(
+                faker.name().firstName(), faker.name().lastName(), faker.internet().emailAddress()
+        );
+        final UpdateUserDTO updateUser = new UpdateUserDTO(faker.internet().username(), faker.internet().password(), faker.number().positive(), updatePerson);
+        final User user = User.builder()
+                .username(faker.internet().username())
+                .password(faker.internet().password())
+                .active(true)
+                .person(Person.builder()
+                        .firstName(faker.name().firstName())
+                        .lastName(faker.name().lastName())
+                        .email(faker.internet().emailAddress())
+                        .build())
+                .department(Department.builder()
+                        .name(faker.commerce().department())
+                        .name(faker.marketing().buzzwords())
+                        .build())
+                .build();
+
+        ReflectionTestUtils.setField(user, "createdAt", Instant.now());
+        ReflectionTestUtils.setField(user, "updatedAt", Instant.now());
+        ReflectionTestUtils.setField(user.getPerson(), "createdAt", Instant.now());
+        ReflectionTestUtils.setField(user.getPerson(), "updatedAt", Instant.now());
+        ReflectionTestUtils.setField(user.getDepartment(), "createdAt", Instant.now());
+        ReflectionTestUtils.setField(user.getDepartment(), "updatedAt", Instant.now());
+
+        final User mappedUser = assertDoesNotThrow(() -> UserMapper.toUser(updateUser, user));
+        assertNotNull(mappedUser);
+        assertEquals(updateUser.username(), mappedUser.getUsername());
+        assertEquals(updateUser.password(), mappedUser.getPassword());
+        assertNotNull(mappedUser.getPerson());
+        assertEquals(updateUser.person().firstName(), mappedUser.getPerson().getFirstName());
+        assertEquals(updateUser.person().lastName(), mappedUser.getPerson().getLastName());
+        assertEquals(updateUser.person().email(), mappedUser.getPerson().getEmail());
+        assertNotNull(mappedUser.getDepartment());
+        assertEquals(user.getDepartment().getName(), mappedUser.getDepartment().getName());
+        assertEquals(user.getDepartment().getDescription(), mappedUser.getDepartment().getDescription());
     }
 
     @DisplayName("""

@@ -12,9 +12,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.Objects;
 
+@DynamicUpdate
 @Entity(name = "backing.Department")
 @Table(schema = "backing", name = "department")
 public class Department extends BaseEntity {

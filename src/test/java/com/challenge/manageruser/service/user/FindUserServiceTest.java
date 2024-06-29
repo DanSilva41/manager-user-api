@@ -218,7 +218,7 @@ class FindUserServiceTest {
         when(userRepository.existsByUsernameOrPersonEmail(any(), any())).thenReturn(false);
 
         assertDoesNotThrow(() ->
-                findUserService.alreadyExists(faker.internet().username(), faker.internet().emailAddress())
+                findUserService.validateAlreadyExists(faker.internet().username(), faker.internet().emailAddress())
         );
 
         verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
@@ -236,7 +236,7 @@ class FindUserServiceTest {
         final var expectedMessage = "There's already a user with this username or person email";
         assertThrows(
                 InvalidUserException.class,
-                () -> findUserService.alreadyExists(faker.internet().username(), faker.internet().emailAddress()),
+                () -> findUserService.validateAlreadyExists(faker.internet().username(), faker.internet().emailAddress()),
                 expectedMessage
         );
 

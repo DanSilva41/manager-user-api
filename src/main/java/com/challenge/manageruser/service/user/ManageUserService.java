@@ -30,7 +30,7 @@ public class ManageUserService {
     }
 
     public DetailUserDTO create(@Valid final CreateUserDTO newUser) {
-        findUserService.alreadyExists(newUser.username(), newUser.person().email());
+        findUserService.validateAlreadyExists(newUser.username(), newUser.person().email());
 
         final var userDepartment = this.findUserDepartment(newUser.departmentCode());
 
@@ -42,6 +42,13 @@ public class ManageUserService {
 
     public DetailUserDTO update(final Integer code, @Valid final UpdateUserDTO updateUser) {
         final var foundUser = findUserService.getByCode(code);
+
+        // se atualização de usuário possui username ou email diferente do atual, valida duplicidade
+        if (!foundUser.getUsername().equals(updateUser.username())
+                || !foundUser.getPerson().getEmail().equals(updateUser.person().email())) {
+            findUserService.validateAlreadyExists(updateUser.username(), updateUser.person().email(), foundUser.getCode());
+        }
+
         // se atualização de usuário possui departamento diferente do atual, atribui o novo departamento
         if (!foundUser.getDepartment().getCode().equals(updateUser.departmentCode())) {
             final var newDepartmentUser = this.findUserDepartment(updateUser.departmentCode());

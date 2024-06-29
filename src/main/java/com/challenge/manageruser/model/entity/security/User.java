@@ -20,9 +20,11 @@ import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.Objects;
 
+@DynamicUpdate
 @Entity(name = "security.User")
 @Table(schema = "security", name = "user")
 public class User extends BaseEntity {

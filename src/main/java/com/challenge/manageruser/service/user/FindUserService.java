@@ -38,8 +38,14 @@ public class FindUserService {
                 .orElseThrow(() -> new NotFoundUserException("User with identifier %d not found".formatted(code)));
     }
 
-    public void alreadyExists(final String username, final String email) {
+    public void validateAlreadyExists(final String username, final String email) {
         if (userRepository.existsByUsernameOrPersonEmail(username, email)) {
+            throw new InvalidUserException("There's already a user with this username or person email");
+        }
+    }
+
+    public void validateAlreadyExists(final String username, final String email, final Integer userCodeForIgnore) {
+        if (userRepository.existsByUsernameOrPersonEmailAndCodeNot(username, email, userCodeForIgnore)) {
             throw new InvalidUserException("There's already a user with this username or person email");
         }
     }

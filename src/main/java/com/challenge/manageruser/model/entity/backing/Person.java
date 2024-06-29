@@ -13,9 +13,11 @@ import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.Objects;
 
+@DynamicUpdate
 @Entity(name = "backing.Person")
 @Table(schema = "backing", name = "person")
 public class Person extends BaseEntity {
