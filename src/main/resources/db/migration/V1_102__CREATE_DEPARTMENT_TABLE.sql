@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS backing."department" (
     code        INT             NOT NULL,
     name        VARCHAR(60)     NOT NULL,
     description VARCHAR(100)    NOT NULL,
+    version     INT             NOT NULL,
     created_at  TIMESTAMPTZ     NOT NULL,
     updated_at  TIMESTAMPTZ     NOT NULL,
     CONSTRAINT pk_department PRIMARY KEY (code),

@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -33,6 +34,10 @@ public class Department extends BaseEntity {
     @Size(min = 5, max = 100)
     @Column(name = "description", length = 60, nullable = false)
     private String description;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Integer version;
 
     public Department() {
         // default constructor

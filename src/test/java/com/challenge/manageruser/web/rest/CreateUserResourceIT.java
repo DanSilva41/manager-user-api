@@ -111,6 +111,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                 """
                         username = 'user001'
                         AND active = true
+                        AND version = 0
                         """
         ));
 
@@ -122,6 +123,7 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                         first_name = 'John'
                         AND last_name = 'Allister'
                         AND email = 'john.allister@gmail.com'
+                        AND version = 0
                         """
         ));
     }
