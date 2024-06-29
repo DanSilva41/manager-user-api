@@ -25,10 +25,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: 'health, metrics'
+        include: 'info, health, metrics'
   endpoint:
     health:
       show-details: always
   health:
     diskSpace:
       enabled: false
+
+springdoc:
+  api-docs:
+    path: /api-docs
