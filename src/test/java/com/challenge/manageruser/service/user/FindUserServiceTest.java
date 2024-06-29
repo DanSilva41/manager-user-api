@@ -1,5 +1,6 @@
 package com.challenge.manageruser.service.user;
 
+import com.challenge.manageruser.exception.InvalidUserException;
 import com.challenge.manageruser.exception.NotFoundUserException;
 import com.challenge.manageruser.model.dto.FilterDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
@@ -162,7 +163,7 @@ class FindUserServiceTest {
         when(userRepository.findByCode(any())).thenReturn(Optional.of(foundUser));
 
         final DetailUserDTO detailUser = assertDoesNotThrow(() ->
-                findUserService.getByCode(userCode)
+                findUserService.getDetailByCode(userCode)
         );
 
         assertNotNull(detailUser);
@@ -200,10 +201,82 @@ class FindUserServiceTest {
         final var expectedMessage = "User with identifier %d not found".formatted(userCode);
         assertThrows(
                 NotFoundUserException.class,
-                () -> findUserService.getByCode(userCode),
+                () -> findUserService.getDetailByCode(userCode),
                 expectedMessage
         );
 
         verify(userRepository, times(1)).findByCode(any());
+    }
+
+    @DisplayName("""
+            DADO uma validação de existência de usuário
+            QUANDO NÃO for existente por username ou email
+            NÃO DEVE lançar exceção
+            """)
+    @Test
+    void shouldNotExistsUserByUsernameOrEmail() {
+        when(userRepository.existsByUsernameOrPersonEmail(any(), any())).thenReturn(false);
+
+        assertDoesNotThrow(() ->
+                findUserService.validateAlreadyExists(faker.internet().username(), faker.internet().emailAddress())
+        );
+
+        verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
+    }
+
+    @DisplayName("""
+            DADO uma validação de existência de usuário
+            QUANDO for existente por username ou email
+            DEVE lançar exceção
+            """)
+    @Test
+    void shouldThrowWhenUserExistsByUsernameOrEmail() {
+        when(userRepository.existsByUsernameOrPersonEmail(any(), any())).thenReturn(true);
+
+        final var expectedMessage = "There's already a user with this username or person email";
+        assertThrows(
+                InvalidUserException.class,
+                () -> findUserService.validateAlreadyExists(faker.internet().username(), faker.internet().emailAddress()),
+                expectedMessage
+        );
+
+        verify(userRepository, times(1)).existsByUsernameOrPersonEmail(any(), any());
+    }
+
+    @DisplayName("""
+            DADO uma validação de existência de usuário
+            QUANDO for existente por identificador único
+            NÃO DEVE lançar exceção
+            """)
+    @Test
+    void shouldExistsUserByCode() {
+        when(userRepository.existsByCode(any())).thenReturn(true);
+
+        assertDoesNotThrow(() ->
+                findUserService.validateIfNotExists(faker.number().positive())
+        );
+
+        verify(userRepository, times(1)).existsByCode(any());
+    }
+
+    @DisplayName("""
+            DADO uma validação de existência de usuário
+            QUANDO NÃO for existente por identificador único
+            DEVE lançar exceção
+            """)
+    @Test
+    void shouldThrowWhenNotExistsUserByCode() {
+        when(userRepository.existsByCode(any())).thenReturn(false);
+
+        final var userCode = faker.number().positive();
+        final var expectedMessage = "User with identifier %d not found".formatted(userCode);
+
+        assertThrows(
+                NotFoundUserException.class,
+                () -> findUserService.validateIfNotExists(userCode),
+                expectedMessage
+        );
+
+        verify(userRepository, times(1)).existsByCode(any());
     }
 }

@@ -3,6 +3,7 @@ package com.challenge.manageruser.support.mapper;
 import com.challenge.manageruser.model.dto.user.CreateUserDTO;
 import com.challenge.manageruser.model.dto.user.DetailUserDTO;
 import com.challenge.manageruser.model.dto.user.SimpleUserDTO;
+import com.challenge.manageruser.model.dto.user.UpdateUserDTO;
 import com.challenge.manageruser.model.entity.backing.Department;
 import com.challenge.manageruser.model.entity.security.User;
 
@@ -23,6 +24,17 @@ public class UserMapper {
                 .department(department)
                 .active(true)
                 .build();
+    }
+
+    public static User toUser(final UpdateUserDTO updateUser, final User user) {
+        user.setUsername(updateUser.username());
+        user.setPassword(updateUser.password());
+        final var person = user.getPerson();
+        person.setFirstName(updateUser.person().firstName());
+        person.setLastName(updateUser.person().lastName());
+        person.setEmail(updateUser.person().email());
+
+        return user;
     }
 
     public static DetailUserDTO toDetailUser(final User user) {

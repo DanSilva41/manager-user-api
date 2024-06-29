@@ -40,18 +40,19 @@ class FindDepartmentServiceTest {
             """)
     @Test
     void shouldGetDepartmentByName() {
-        final var departmentName = faker.commerce().department();
+        final var departmentCode = faker.number().positive();
         final var foundDepartment = Department.builder()
-                .name(departmentName)
+                .name(faker.commerce().department())
                 .name(faker.marketing().buzzwords())
                 .build();
+        ReflectionTestUtils.setField(foundDepartment, "code", departmentCode);
         ReflectionTestUtils.setField(foundDepartment, "createdAt", Instant.now());
         ReflectionTestUtils.setField(foundDepartment, "updatedAt", Instant.now());
 
-        when(departmentRepository.findByName(any())).thenReturn(Optional.of(foundDepartment));
+        when(departmentRepository.findByCode(any())).thenReturn(Optional.of(foundDepartment));
 
         final Department returnedDepartment = assertDoesNotThrow(() ->
-                findDepartmentService.getByName(departmentName)
+                findDepartmentService.getByCode(departmentCode)
         );
 
         assertNotNull(returnedDepartment);
@@ -60,7 +61,7 @@ class FindDepartmentServiceTest {
         assertEquals(foundDepartment.getCreatedAt(), returnedDepartment.getCreatedAt());
         assertEquals(foundDepartment.getUpdatedAt(), returnedDepartment.getUpdatedAt());
 
-        verify(departmentRepository, times(1)).findByName(any());
+        verify(departmentRepository, times(1)).findByCode(any());
     }
 
     @DisplayName("""
@@ -70,16 +71,16 @@ class FindDepartmentServiceTest {
             """)
     @Test
     void shouldThrowWhenDepartmentNotFoundByName() {
-        final var departmentName = faker.commerce().department();
-        when(departmentRepository.findByName(any())).thenReturn(Optional.empty());
+        final var departmentCode = faker.number().positive();
+        when(departmentRepository.findByCode(any())).thenReturn(Optional.empty());
 
-        final var expectedMessage = "Department %s not found".formatted(departmentName);
+        final var expectedMessage = "Department %s not found".formatted(departmentCode);
         assertThrows(
                 NotFoundDepartmentException.class,
-                () -> findDepartmentService.getByName(departmentName),
+                () -> findDepartmentService.getByCode(departmentCode),
                 expectedMessage
         );
 
-        verify(departmentRepository, times(1)).findByName(any());
+        verify(departmentRepository, times(1)).findByCode(any());
     }
 }

@@ -18,90 +18,140 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class CreateUserResourceIT extends AbstractIntegrationTest {
+class UpdateUserResourceIT extends AbstractIntegrationTest {
 
-    private static final String USER_V1_ENDPOINT = "/v1/user";
+    private static final String USER_V1_ENDPOINT = "/v1/user/%d";
 
     private final MockMvc mockMvc;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    CreateUserResourceIT(final MockMvc mockMvc, final JdbcTemplate jdbcTemplate) {
+    UpdateUserResourceIT(final MockMvc mockMvc, final JdbcTemplate jdbcTemplate) {
         this.mockMvc = mockMvc;
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @DisplayName("""
-            DADO um novo usuário
+            DADO uma atualização de usuário
             QUANDO for houver campos inválidos
-            NÃO DEVE criar o usuário
+            NÃO DEVE atualizar o usuário
             E retornar 400 (BAD REQUEST)
             """)
+    @Sql("/db/scripts/users-list.sql")
     @ParameterizedTest
-    @MethodSource("invalidPayloadsUserCreation")
-    void shouldFailInUserCreationWhenInvalidPayload(String invalidPayload, List<String> errorMessages) throws Exception {
-        mockMvc.perform(post(USER_V1_ENDPOINT)
+    @MethodSource("invalidPayloadsUserUpdate")
+    void shouldFailInUserUpdateWhenInvalidPayload(String invalidPayload, List<String> errorMessages) throws Exception {
+        final var userCode = 1;
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "security.user",
+                """
+                        code = %d
+                        AND version = 1
+                        """.formatted(userCode)
+        ));
+
+        final var formattedUrl = USER_V1_ENDPOINT.formatted(userCode);
+        mockMvc.perform(put(formattedUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidPayload)
                 ).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Invalid request content"))
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").doesNotExist())
-                .andExpect(jsonPath("$.instance").value(USER_V1_ENDPOINT))
+                .andExpect(jsonPath("$.instance").value(formattedUrl))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.messages").value(Matchers.containsInAnyOrder(errorMessages.toArray())));
 
-        Assertions.assertEquals(0, JdbcTestUtils.countRowsInTable(
+        Assertions.assertEquals(0, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate,
-                "security.user"
+                "security.user",
+                """
+                        code = %d
+                        AND version = 2
+                        """.formatted(userCode)
         ));
     }
 
     @DisplayName("""
-            DADO um novo usuário
+            DADO uma atualização de usuário
             QUANDO for válido e não existente com o mesmo username e email
-            DEVE criar o usuário
+            DEVE atualizar o usuário
             E retornar os detalhes do mesmo
             """)
-    @Sql("/db/scripts/created-departments.sql")
+    @Sql("/db/scripts/users-list.sql")
     @Test
-    void shouldCreateNewUser() throws Exception {
+    void shouldUpdateUser() throws Exception {
+        final var userCode = 1;
+        final var personCode = 1;
+
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "security.user",
+                """
+                        code = %d
+                        AND version = 1
+                        """.formatted(userCode)
+        ));
+
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "backing.person",
+                """
+                        code = %d
+                        AND first_name = 'John'
+                        AND last_name = 'Allister'
+                        AND email = 'john.allister@gmail.com'
+                        """.formatted(personCode)
+        ));
+
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTable(
+                jdbcTemplate,
+                "security.user"
+        ));
+
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTable(
+                jdbcTemplate,
+                "backing.person"
+        ));
+
         final var validPayload = """
                 {
-                  "username": "user001",
-                  "password": "p@ssw0rd",
-                  "department_code": 1,
+                  "username": "user099",
+                  "password": "strong-p@ssw0rd",
+                  "department_code": 2,
                   "person": {
-                    "first_name": "John",
+                    "first_name": "Johnny",
                     "last_name": "Allister",
                     "email": "john.allister@gmail.com"
                   }
                 }
                 """;
 
-        mockMvc.perform(post(USER_V1_ENDPOINT)
+        final var formattedUrl = USER_V1_ENDPOINT.formatted(userCode);
+        mockMvc.perform(put(formattedUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload)
-                ).andExpect(status().isCreated())
+                ).andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(1))
-                .andExpect(jsonPath("$.username").value("user001"))
+                .andExpect(jsonPath("$.username").value("user099"))
                 .andExpect(jsonPath("$.active").value(true))
                 .andExpect(jsonPath("$.created_at").exists())
                 .andExpect(jsonPath("$.updated_at").exists())
                 .andExpect(jsonPath("$.person").exists())
                 .andExpect(jsonPath("$.person.code").value(1))
-                .andExpect(jsonPath("$.person.first_name").value("John"))
+                .andExpect(jsonPath("$.person.first_name").value("Johnny"))
                 .andExpect(jsonPath("$.person.last_name").value("Allister"))
                 .andExpect(jsonPath("$.person.email").value("john.allister@gmail.com"))
                 .andExpect(jsonPath("$.person.created_at").exists())
                 .andExpect(jsonPath("$.person.updated_at").exists())
                 .andExpect(jsonPath("$.department").exists())
-                .andExpect(jsonPath("$.department.name").value("FINANCEIRO"))
-                .andExpect(jsonPath("$.department.description").value("Setor responsável pela contabilidade e prestação de contas"))
+                .andExpect(jsonPath("$.department.name").value("MARKETING"))
+                .andExpect(jsonPath("$.department.description").value("Setor responsável pelas mídias sociais e marca da empresa"))
                 .andExpect(jsonPath("$.department.created_at").exists())
                 .andExpect(jsonPath("$.department.updated_at").exists());
 
@@ -109,10 +159,13 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                 jdbcTemplate,
                 "security.user",
                 """
-                        username = 'user001'
-                        AND active = true
-                        AND version = 0
-                        """
+                            code = %d
+                            AND username = 'user099'
+                            AND password = 'strong-p@ssw0rd'
+                            AND department_code = 2
+                            AND active = true
+                            AND version = 2
+                        """.formatted(userCode)
         ));
 
 
@@ -120,39 +173,39 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                 jdbcTemplate,
                 "backing.person",
                 """
-                        first_name = 'John'
+                        code = %d
+                        AND first_name = 'Johnny'
                         AND last_name = 'Allister'
                         AND email = 'john.allister@gmail.com'
-                        AND version = 0
-                        """
+                        """.formatted(personCode)
+        ));
+
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTable(
+                jdbcTemplate,
+                "security.user"
+        ));
+
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTable(
+                jdbcTemplate,
+                "backing.person"
         ));
     }
 
     @DisplayName("""
-            DADO um novo usuário
+            DADO uma atualização de usuário
             QUANDO for válido porém com username já existente
-            NÃO DEVE criar o usuário
+            NÃO DEVE atualizar o usuário
             E retornar 400 (BAD REQUEST)
             """)
-    @Sql("/db/scripts/already-existent-user.sql")
+    @Sql("/db/scripts/users-list.sql")
     @Test
-    void shouldFailInUserCreationWhenAlreadyExistsUserByUsername() throws Exception {
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+    void shouldFailInUserUpdateWhenAlreadyExistsUserByUsername() throws Exception {
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate,
                 "security.user",
                 """
-                        username = 'user001'
-                        AND active = true
-                        """
-        ));
-
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
-                jdbcTemplate,
-                "backing.person",
-                """
-                        first_name = 'John'
-                        AND last_name = 'Allister'
-                        AND email = 'john.allister@gmail.com'
+                        username IN ('user001', 'paulwalker')
+                        AND version = 1
                         """
         ));
 
@@ -169,161 +222,140 @@ class CreateUserResourceIT extends AbstractIntegrationTest {
                 }
                 """;
 
-        mockMvc.perform(post(USER_V1_ENDPOINT)
+        final var userCode = 2;
+        final var formattedUrl = USER_V1_ENDPOINT.formatted(userCode);
+        mockMvc.perform(put(formattedUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload)
                 ).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Invalid request"))
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value("There's already a user with this username or person email"))
-                .andExpect(jsonPath("$.instance").value(USER_V1_ENDPOINT))
+                .andExpect(jsonPath("$.instance").value(formattedUrl))
                 .andExpect(jsonPath("$.timestamp").exists());
 
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate,
                 "security.user",
                 """
-                        username = 'user001'
-                        AND active = true
-                        """
-        ));
-
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
-                jdbcTemplate,
-                "backing.person",
-                """
-                        first_name = 'John'
-                        AND last_name = 'Allister'
-                        AND email = 'john.allister@gmail.com'
+                        username IN ('user001', 'paulwalker')
+                        AND version = 1
                         """
         ));
     }
 
     @DisplayName("""
-            DADO um novo usuário
+            DADO uma atualização de usuário
             QUANDO for válido porém com email já existente
-            NÃO DEVE criar o usuário
+            NÃO DEVE atualizar o usuário
             E retornar 400 (BAD REQUEST)
             """)
-    @Sql("/db/scripts/already-existent-user.sql")
+    @Sql("/db/scripts/users-list.sql")
     @Test
-    void shouldFailInUserCreationWhenAlreadyExistsUserByEmail() throws Exception {
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
-                jdbcTemplate,
-                "security.user",
-                """
-                        username = 'user001'
-                        AND active = true
-                        """
-        ));
-
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+    void shouldFailInUserUpdateWhenAlreadyExistsUserByEmail() throws Exception {
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate,
                 "backing.person",
                 """
-                        first_name = 'John'
-                        AND last_name = 'Allister'
-                        AND email = 'john.allister@gmail.com'
+                        email IN ('john.allister@gmail.com', 'paul.walker@gmail.com')
+                        AND version = 1
                         """
         ));
 
         final var validPayload = """
                 {
-                  "username": "user001",
+                  "username": "paulwalker",
                   "password": "p@ssw0rd",
                   "department_code": 1,
                   "person": {
-                    "first_name": "John",
-                    "last_name": "Allister",
+                    "first_name": "Paul",
+                    "last_name": "Walker",
                     "email": "john.allister@gmail.com"
                   }
                 }
                 """;
 
-        mockMvc.perform(post(USER_V1_ENDPOINT)
+        final var userCode = 2;
+        final var formattedUrl = USER_V1_ENDPOINT.formatted(userCode);
+        mockMvc.perform(put(formattedUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload)
                 ).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Invalid request"))
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value("There's already a user with this username or person email"))
-                .andExpect(jsonPath("$.instance").value(USER_V1_ENDPOINT))
+                .andExpect(jsonPath("$.instance").value(formattedUrl))
                 .andExpect(jsonPath("$.timestamp").exists());
 
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
-                jdbcTemplate,
-                "security.user",
-                """
-                        username = 'user001'
-                        AND active = true
-                        """
-        ));
-
-        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+        Assertions.assertEquals(2, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate,
                 "backing.person",
                 """
-                        first_name = 'John'
-                        AND last_name = 'Allister'
-                        AND email = 'john.allister@gmail.com'
+                        email IN ('john.allister@gmail.com', 'paul.walker@gmail.com')
+                        AND version = 1
                         """
         ));
     }
 
     @DisplayName("""
-            DADO um novo usuário
+            DADO uma atualização de usuário
             QUANDO for válido porém com identificador de departamento não existente
-            NÃO DEVE criar o usuário
+            NÃO DEVE atualizar o usuário
             E retornar 400 (BAD REQUEST)
             """)
-    @Sql("/db/scripts/created-departments.sql")
+    @Sql("/db/scripts/users-list.sql")
     @Test
-    void shouldFailInUserCreationWhenDepartmentNotFound() throws Exception {
-        final var departmentCode = 3;
+    void shouldFailInUserUpdateWhenDepartmentNotFound() throws Exception {
+        final var userCode = 1;
+        final var currentDepartmentCode = 1;
+        final var desirableDepartmentCode = 3;
+
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate,
+                "security.user",
+                """
+                        code = %d
+                        AND department_code = %d
+                        AND version = 1
+                        """.formatted(userCode, currentDepartmentCode)
+        ));
+
         final var validPayload = """
                 {
                   "username": "user001",
                   "password": "p@ssw0rd",
                   "department_code": %d,
                   "person": {
-                    "first_name": "Paul",
-                    "last_name": "Walker",
-                    "email": "paul.walker@gmail.com"
+                    "first_name": "John",
+                    "last_name": "Allister",
+                    "email": "john.allister@gmail.com"
                   }
                 }
-                """.formatted(departmentCode);
+                """.formatted(desirableDepartmentCode);
 
-        mockMvc.perform(post(USER_V1_ENDPOINT)
+        final var formattedUrl = USER_V1_ENDPOINT.formatted(userCode);
+        mockMvc.perform(put(formattedUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload)
                 ).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Invalid request"))
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value("Department %d not found".formatted(departmentCode)))
-                .andExpect(jsonPath("$.instance").value(USER_V1_ENDPOINT))
+                .andExpect(jsonPath("$.detail").value("Department %d not found".formatted(desirableDepartmentCode)))
+                .andExpect(jsonPath("$.instance").value(formattedUrl))
                 .andExpect(jsonPath("$.timestamp").exists());
 
-        Assertions.assertEquals(0, JdbcTestUtils.countRowsInTableWhere(
+        Assertions.assertEquals(1, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate,
                 "security.user",
                 """
-                        username = 'user001'
-                        AND active = true
-                        """
-        ));
-
-        Assertions.assertEquals(0, JdbcTestUtils.countRowsInTableWhere(
-                jdbcTemplate,
-                "backing.person",
-                """
-                        first_name = 'John'
-                        AND last_name = 'Allister'
-                        AND email = 'john.allister@gmail.com'
-                        """
+                        code = %d
+                        AND department_code = %d
+                        AND version = 1
+                        """.formatted(userCode, currentDepartmentCode)
         ));
     }
 
-    private static Stream<Arguments> invalidPayloadsUserCreation() {
+    private static Stream<Arguments> invalidPayloadsUserUpdate() {
         return Stream.of(
                 Arguments.of("""
                                 {

@@ -16,12 +16,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.Objects;
 
+@DynamicUpdate
 @Entity(name = "security.User")
 @Table(schema = "security", name = "user")
 public class User extends BaseEntity {
@@ -51,8 +54,12 @@ public class User extends BaseEntity {
     private Person person;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_name", nullable = false)
+    @JoinColumn(name = "department_code", nullable = false)
     private Department department;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Integer version;
 
     public User() {
         // default constructor
@@ -136,6 +143,10 @@ public class User extends BaseEntity {
 
     public void setDepartment(Department department) {
         this.department = department;
+    }
+
+    public Integer getVersion() {
+        return version;
     }
 
     public static UserBuilder builder() {

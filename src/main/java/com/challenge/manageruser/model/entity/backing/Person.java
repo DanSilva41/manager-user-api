@@ -9,12 +9,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.Objects;
 
+@DynamicUpdate
 @Entity(name = "backing.Person")
 @Table(schema = "backing", name = "person")
 public class Person extends BaseEntity {
@@ -40,6 +43,10 @@ public class Person extends BaseEntity {
     @Size(min = 5, max = 100)
     @Column(name = "email", length = 150, unique = true, nullable = false)
     private String email;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Integer version;
 
     public Person() {
         // default constructor
@@ -106,6 +113,10 @@ public class Person extends BaseEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Integer getVersion() {
+        return version;
     }
 
     public static PersonBuilder builder() {
