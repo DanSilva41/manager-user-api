@@ -1,11 +1,12 @@
 package com.challenge.manageruser.service.department;
 
-import com.challenge.manageruser.exception.InvalidDepartmentException;
 import com.challenge.manageruser.model.dto.department.CreateDepartmentDTO;
 import com.challenge.manageruser.model.dto.department.DetailDepartmentDTO;
 import com.challenge.manageruser.repository.DepartmentRepository;
 import com.challenge.manageruser.support.mapper.DepartmentMapper;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -13,25 +14,25 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class ManageDepartmentService {
 
-    private final DepartmentRepository departmentRepository;
+    private static final Logger log = LoggerFactory.getLogger(ManageDepartmentService.class);
 
-    public ManageDepartmentService(final DepartmentRepository departmentRepository) {
+    private final DepartmentRepository departmentRepository;
+    private final FindDepartmentService findDepartmentService;
+
+    public ManageDepartmentService(final DepartmentRepository departmentRepository,
+                                   final FindDepartmentService findDepartmentService) {
         this.departmentRepository = departmentRepository;
+        this.findDepartmentService = findDepartmentService;
     }
 
     public DetailDepartmentDTO create(@Valid final CreateDepartmentDTO newDepartment) {
-        validateIfExists(newDepartment.name());
+        findDepartmentService.validateIfAlreadyExists(newDepartment.name());
 
+        log.info("m=persisting new department, departmentName={}", newDepartment.name());
         final var savedDepartment = departmentRepository.save(
                 DepartmentMapper.toDepartment(newDepartment)
         );
 
         return DepartmentMapper.toDetailDepartment(savedDepartment);
-    }
-
-    private void validateIfExists(final String departmentName) {
-        if (departmentRepository.existsByName(departmentName)) {
-            throw new InvalidDepartmentException("There's already a department with this name");
-        }
     }
 }

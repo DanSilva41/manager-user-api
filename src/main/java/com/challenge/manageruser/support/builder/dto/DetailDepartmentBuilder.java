@@ -6,13 +6,19 @@ import java.time.LocalDateTime;
 
 public class DetailDepartmentBuilder {
 
+    private Integer code;
     private String name;
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public DetailDepartmentDTO build() {
-        return new DetailDepartmentDTO(name, description, createdAt, updatedAt);
+        return new DetailDepartmentDTO(code, name, description, createdAt, updatedAt);
+    }
+
+    public DetailDepartmentBuilder code(final Integer code) {
+        this.code = code;
+        return this;
     }
 
     public DetailDepartmentBuilder name(final String name) {

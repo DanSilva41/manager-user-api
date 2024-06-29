@@ -40,12 +40,15 @@ class DepartmentMapperTest {
             """)
     @Test
     void shouldMapperToDetailDepartmentFromDepartment() {
+        final var departmentCode = faker.number().positive();
         final Department department = Department.builder().name(faker.commerce().department()).description(faker.marketing().buzzwords()).build();
+        ReflectionTestUtils.setField(department, "code", departmentCode);
         ReflectionTestUtils.setField(department, "createdAt", Instant.now());
         ReflectionTestUtils.setField(department, "updatedAt", Instant.now());
 
         final DetailDepartmentDTO mappedDetailDepartment = assertDoesNotThrow(() -> DepartmentMapper.toDetailDepartment(department));
         assertNotNull(mappedDetailDepartment);
+        assertEquals(departmentCode, mappedDetailDepartment.code());
         assertEquals(department.getName(), mappedDetailDepartment.name());
         assertEquals(department.getDescription(), mappedDetailDepartment.description());
         assertEquals(LocalDateTime.ofInstant(department.getCreatedAt(), ZoneOffset.UTC), mappedDetailDepartment.createdAt());

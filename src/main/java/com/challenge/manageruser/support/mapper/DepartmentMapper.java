@@ -22,6 +22,7 @@ public class DepartmentMapper {
 
     public static DetailDepartmentDTO toDetailDepartment(final Department department) {
         return DetailDepartmentDTO.builder()
+                .code(department.getCode())
                 .name(department.getName())
                 .description(department.getDescription())
                 .createdAt(LocalDateTime.ofInstant(department.getCreatedAt(), ZoneOffset.UTC))

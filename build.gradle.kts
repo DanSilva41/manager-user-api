@@ -36,6 +36,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-database-postgresql")
+	implementation("io.micrometer:micrometer-tracing-bridge-brave")
 	implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
 	implementation("org.apache.commons:commons-text:${commonsTextVersion}")
 	implementation("com.google.guava:guava:${googleGuavaVersion}")
