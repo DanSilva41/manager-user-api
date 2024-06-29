@@ -145,6 +145,10 @@ public class User extends BaseEntity {
         this.department = department;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
     public static UserBuilder builder() {
         return new UserBuilder();
     }

@@ -94,6 +94,10 @@ public class Department extends BaseEntity {
         this.description = description;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
     public static DepartmentBuilder builder() {
         return new DepartmentBuilder();
     }

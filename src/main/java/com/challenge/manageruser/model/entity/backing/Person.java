@@ -115,6 +115,10 @@ public class Person extends BaseEntity {
         this.email = email;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
     public static PersonBuilder builder() {
         return new PersonBuilder();
     }
